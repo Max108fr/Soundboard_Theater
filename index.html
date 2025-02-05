@@ -14,33 +14,27 @@
         .container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 15px;
             padding: 20px;
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
         }
         .sound-button {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px;
-            font-size: 16px;
+            justify-content: center;
+            width: 180px;
+            height: 120px;
+            font-size: 18px;
             border: none;
-            background-color: #444;
-            color: white;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 10px;
             text-align: center;
-        }
-        .sound-button img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 5px;
-            margin-bottom: 5px;
+            transition: background-color 0.3s;
         }
         .sound-button:hover {
-            background-color: #666;
+            filter: brightness(1.2);
         }
         .info {
             margin-top: 20px;
@@ -54,8 +48,8 @@
 
     <script>
         const sounds = [
-            { name: "01 Schule", file: "01_Schule.mp3", image: "kick.jpg" },
-            { name: "02 Klingel", file: "01_Klingel.mp3", image: "snare.jpg" },
+            { name: "01 Schule", file: "01_Schule.mp3", color: "#ff5733" },
+            { name: "02 Klingel", file: "01_Klingel.mp3", color: "#33ff57" },
             { name: "03 Kampf START", file: "02_Fight-Start.mp3", image: "hihat.jpg" },
             { name: "03 Kampf LOOP", file: "02_Fight-Loop.mp3", image: "clap.jpg" },
             { name: "03 Kampf LOOSE", file: "02_Fight-Game-Over-03.mp3", image: "bass.jpg" },
@@ -66,51 +60,63 @@
             { name: "06 Alien KOFFERRAUM", file: "16_Alien-2_Kofferraum.mp3", image: "ride.jpg" },
             { name: "07 Kirche", file: "17_Kirche.mp3", image: "bell.jpg" },
             { name: "08 Nacht", file: "18_Nacht.mp3", image: "fx.jpg" },
-            { name: "Vocal", file: "sound13.mp3", image: "vocal.jpg" },
+            { name: "01 Schule 02", file: "01_Schule_02.mp3", image: "vocal.jpg" },
             { name: "Chord", file: "sound14.mp3", image: "chord.jpg" },
             { name: "Perc", file: "sound15.mp3", image: "perc.jpg" },
             { name: "808", file: "sound16.mp3", image: "808.jpg" }
-        ];
+            ];
 
-        const audioElements = {};
-        const soundboard = document.getElementById("soundboard");
-        const info = document.getElementById("info");
+const audioElements = {};
+const soundboard = document.getElementById("soundboard");
+const info = document.getElementById("info");
 
-        sounds.forEach((sound) => {
-            const btn = document.createElement("button");
-            btn.classList.add("sound-button");
-            btn.innerHTML = `<img src="${sound.image}" alt="${sound.name}"><span>${sound.name}</span>`;
-            btn.onclick = () => toggleSound(sound.file, sound.name);
-            soundboard.appendChild(btn);
-            
-            const audio = new Audio(sound.file);
-            audio.loop = false;
-            audioElements[sound.file] = audio;
-        });
+sounds.forEach((sound) => {
+    const btn = document.createElement("button");
+    btn.classList.add("sound-button");
+    btn.innerHTML = `<img src="${sound.image}" alt="${sound.name}"><span>${sound.name}</span>`;
+    btn.onclick = () => toggleSound(sound.file, sound.name);
+    soundboard.appendChild(btn);
+    
+    const audio = new Audio(sound.file);
+    audio.loop = false;
+    audioElements[sound.file] = audio;
+});
 
-        function toggleSound(sound, name) {
-            const audio = audioElements[sound];
-            if (!audio.paused) {
-                audio.pause();
-                audio.currentTime = 0;
-            } else {
-                audio.play();
-                updateInfo(audio, name);
-            }
+function toggleSound(sound, name) {
+    const audio = audioElements[sound];
+    if (!audio.paused) {
+        fadeOut(audio);
+    } else {
+        audio.volume = 1;
+        audio.play();
+        updateInfo(audio, name);
+    }
+}
+
+function fadeOut(audio) {
+    let fadeInterval = setInterval(() => {
+        if (audio.volume > 0.05) {
+            audio.volume -= 0.05;
+        } else {
+            clearInterval(fadeInterval);
+            audio.pause();
+            audio.currentTime = 0;
         }
+    }, 50);
+}
 
-        function updateInfo(audio, name) {
-            function updateTime() {
-                const remaining = (audio.duration - audio.currentTime).toFixed(1);
-                info.innerHTML = `${name} - Remaining: ${remaining} sec`;
-                if (!audio.paused) {
-                    requestAnimationFrame(updateTime);
-                } else {
-                    info.innerHTML = "";
-                }
-            }
-            updateTime();
+function updateInfo(audio, name) {
+    function updateTime() {
+        const remaining = (audio.duration - audio.currentTime).toFixed(1);
+        info.innerHTML = `${name} - Remaining: ${remaining} sec`;
+        if (!audio.paused) {
+            requestAnimationFrame(updateTime);
+        } else {
+            info.innerHTML = "";
         }
-    </script>
+    }
+    updateTime();
+}
+</script>
 </body>
 </html>
